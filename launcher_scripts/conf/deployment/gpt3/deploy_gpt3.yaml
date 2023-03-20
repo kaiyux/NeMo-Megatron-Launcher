@@ -1,0 +1,8 @@
+run:
+  name: deploy_${.model_train_name}
+  time_limit: "02:00:00"
+  model_train_name: "gpt3_5b"
+  dependency: "singleton"
+  triton_model_dir: ${.results_dir}/model_repo/${.model_train_name}
+  results_dir: ${base_results_dir}/${.model_train_name}/export_${.config_summary}
+  model_type: "gpt3"

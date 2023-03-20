@@ -19,6 +19,7 @@ import hydra
 import omegaconf
 
 from nemo_launcher.core.data_stages import CustomDataPreparation, MC4DataPreparation, PileDataPreparation
+from nemo_launcher.core.deployment_stages import Deployment
 from nemo_launcher.core.export_stages import Export
 from nemo_launcher.core.stages import (
     AdapterLearning,
@@ -52,6 +53,7 @@ STR2STAGECLASS = {
         MC4DataPreparation: ["mt5"],
         CustomDataPreparation: ["generic"],
     },
+    "deployment": Deployment,
 }
 
 
