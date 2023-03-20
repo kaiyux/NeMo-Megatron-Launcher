@@ -20,6 +20,7 @@ from typing import Dict, List
 from nemo_launcher.core.launchers import AutoLauncher
 from nemo_launcher.core.stages import NemoMegatronStage, clean_command_groups
 
+PYTHON_BIN = "python3"
 FT_PATH = Path("/opt/FasterTransformer")
 FT_BACKEND_PATH = Path("/opt/fastertransformer_backend")
 
@@ -44,7 +45,7 @@ class Export(NemoMegatronStage):
     def _make_checkpoint_search_command(self, **kwargs):
         checkpoint_override = [f"{k}={v}" for k, v in kwargs.items()]
         return (
-            f"python3 {self._launcher_scripts_path / 'nemo_launcher/collections/checkpoint_search.py'} "
+            f"${PYTHON_BIN} {self._launcher_scripts_path / 'nemo_launcher/collections/checkpoint_search.py'} "
             f"{' '.join(checkpoint_override)}"
         )
 
@@ -200,7 +201,7 @@ class Export(NemoMegatronStage):
         triton_model_version_dir = f"{triton_model_dir}/1"
 
         convert_cmd = (
-            f"python -u {converter_path} \\\n"
+            f"${PYTHON_BIN} -u {converter_path} \\\n"
             f" --in-file {checkpoint_path} \\\n"
             f" --saved-dir {triton_model_version_dir} \\\n"
             f" --infer-gpu-num {ft_model_cfg.tensor_model_parallel_size} \\\n"
@@ -211,7 +212,7 @@ class Export(NemoMegatronStage):
             f" --load-checkpoints-to-cpu {int(ft_model_cfg.load_checkpoints_to_cpu)}"
         )
         triton_prepare_model_config_cmd = (
-            f"python -u {prepare_model_config_script_path} \\\n"
+            f"${PYTHON_BIN} -u {prepare_model_config_script_path} \\\n"
             f" --model-train-name {run_cfg.model_train_name} \\\n"
             f" --template-path {template_path} \\\n"
             f" --ft-checkpoint {triton_model_version_dir}/{ft_model_cfg.tensor_model_parallel_size}-gpu \\\n"
@@ -253,7 +254,7 @@ class Export(NemoMegatronStage):
         triton_model_version_dir = f"{triton_model_dir}/1"
 
         convert_cmd = (
-            f"python -u {converter_path} \\\n"
+            f"${PYTHON_BIN} -u {converter_path} \\\n"
             f" --in-file {checkpoint_path} \\\n"
             f" --saved-dir {triton_model_version_dir} \\\n"
             f" --model-name {run_cfg.model_train_name} \\\n"
@@ -262,7 +263,7 @@ class Export(NemoMegatronStage):
             f" --processes {ft_model_cfg.processes}"
         )
         triton_prepare_model_config_cmd = (
-            f"python -u {prepare_model_config_script_path} \\\n"
+            f"${PYTHON_BIN} -u {prepare_model_config_script_path} \\\n"
             f" --model-train-name {run_cfg.model_train_name} \\\n"
             f" --template-path {template_path} \\\n"
             f" --ft-checkpoint {triton_model_version_dir}/{ft_model_cfg.tensor_model_parallel_size}-gpu \\\n"
