@@ -23,6 +23,7 @@ from nemo_launcher.core.stages import NemoMegatronStage, clean_command_groups
 PYTHON_BIN = "python3"
 FT_PATH = Path("/opt/FasterTransformer")
 FT_BACKEND_PATH = Path("/opt/fastertransformer_backend")
+TRITONSERVER = "/opt/tritonserver/bin/tritonserver"
 
 # for debugging
 FT_PATH_WITH_BUILD = FT_PATH
@@ -67,7 +68,7 @@ class Deployment(NemoMegatronStage):
         """
         choice_model_type, choice_name = self.get_stage_config_choice()
         cmds_fn = {
-            "deploy": {
+            "deployment": {
                 "gpt3": self._get_gpt_deployment_cmds,
                 "t5": self._get_t5_deployment_cmds,
                 "mt5": self._get_t5_deployment_cmds,
@@ -76,7 +77,7 @@ class Deployment(NemoMegatronStage):
         return cmds_fn(self.cfg)
 
     def _make_sub_stages(self):
-        sub_stages = ["convert"]
+        sub_stages = ["deployment"]
         return sub_stages
 
     def setup_folder_and_data(self) -> None:
@@ -170,7 +171,28 @@ class Deployment(NemoMegatronStage):
 
     def _get_gpt_deployment_cmds(self, cfg):
         """ Generate deploy commands for GPT-3 models"""
-        raise NotImplementedError
+        run_cfg = cfg.deployment.run
+        model_cfg = cfg.deployment.model
+        world_size = model_cfg.tensor_model_parallel_size * model_cfg.pipeline_model_parallel_size
+        cuda_visible_devices = [str(i) for i in range(world_size)]
+        cuda_visible_devices = ','.join(cuda_visible_devices)
+
+        # gpt_gemm <batch_size> <beam_width> <max_input_len> <head_number> <size_per_head> <inter_size> <vocab_size> <data_type> <tensor_para_size> <is_append>
+        gemm_test_cmd = (
+            f"{FT_BACKEND_PATH}/build/bin/gpt_gemm"
+        )
+
+        model_repo = f"{run_cfg.results_dir}/model_repo"
+        tritonserver_cmd = (
+            f"CUDA_VISIBLE_DEVICES={cuda_visible_devices} {TRITONSERVER} \\\n"
+            f" --model-repository={model_repo}"
+        )
+
+        return [
+            (
+                f"{tritonserver_cmd}"
+            )
+        ]
 
     def _get_t5_deployment_cmds(self, cfg):
         """ Generate deploy commands for T5/mT5 models"""

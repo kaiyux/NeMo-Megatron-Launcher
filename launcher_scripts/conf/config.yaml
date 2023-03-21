@@ -10,6 +10,7 @@ defaults:
   - ia3_learning: null
   - evaluation: gpt3/evaluate_all
   - export: gpt3/export_gpt3
+  - deployment: gpt3/deploy_gpt3
   - override hydra/job_logging: stdout
 
 hydra:
@@ -64,3 +65,4 @@ ia3_learning_config: ${hydra:runtime.choices.ia3_learning}
 evaluation_config: ${hydra:runtime.choices.evaluation}
 conversion_config: ${hydra:runtime.choices.conversion}
 export_config: ${hydra:runtime.choices.export}
+deployment_config: ${hydra:runtime.choices.deployment}
